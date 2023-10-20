@@ -4,6 +4,7 @@ import com.example.exprep.model.binding.UserLoginBindingModel;
 import com.example.exprep.model.binding.UserRegisterBindingModel;
 import com.example.exprep.model.service.UserServiceModel;
 import com.example.exprep.service.UserService;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Controller;
@@ -29,7 +30,7 @@ public class UserController {
 
     @GetMapping("/register")
     public String register() {
-        return "/register";
+        return "register";
     }
 
     @PostMapping("/register")
@@ -45,13 +46,13 @@ public class UserController {
                     .addFlashAttribute("org.springframework.validation.BindingResult.userRegisterBindingModel",
                             bindingResult);
 
-            return "redirect:/register";
+            return "redirect:register";
         }
 
         userService.registerUser(modelMapper
                 .map(userRegisterBindingModel, UserServiceModel.class));
 
-        return "redirect:/login";
+        return "redirect:login";
     }
 
     @GetMapping("/login")
@@ -59,7 +60,7 @@ public class UserController {
         if (!model.containsAttribute("isFound")) {
             model.addAttribute("isFound", true);
         }
-        return "/login";
+        return "login";
     }
 
     @PostMapping("/login")
@@ -73,7 +74,7 @@ public class UserController {
                     .addFlashAttribute("org.springframework.validation.BindingResult.userLoginBindingModel",
                             bindingResult);
 
-            return "redirect:/login";
+            return "redirect:login";
         }
         UserServiceModel userServiceModel = userService
                 .findByUsernameAndPassword(userLoginBindingModel.getUsername(),
@@ -83,10 +84,17 @@ public class UserController {
             redirectAttributes.addFlashAttribute("userLoginBindingModel",
                             userLoginBindingModel)
                     .addFlashAttribute("isFound", false);
-            return "redirect:/login";
+            return "redirect:login";
         }
 
         userService.loginUser(userServiceModel.getId(), userServiceModel.getUsername());
+
+        return "redirect:/";
+    }
+
+    @GetMapping("/logout")
+    public String logout(HttpSession httpSession) {
+        httpSession.invalidate();
 
         return "redirect:/";
     }
